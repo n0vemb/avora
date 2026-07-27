@@ -56,7 +56,7 @@ export async function getGlobalSettings(): Promise<{
   hero: GlobalSettingsHero
   brandStatement: BrandStatementProps
   features: { icon: string; title: string; description: string }[]
-  aboutSection: { heading: string; subheading: string; description: string; buttonText: string; image?: { src: string; alt: string; width: number; height: number }; video?: { src: string } } | null
+  aboutSection: { heading: string; subheading: string; description: string; buttonText: string; image: { src: string; alt: string; width: number; height: number } } | null
   whyAvora: WhyAvoraSectionProps
   finalCta: CTASectionProps
 }> {
@@ -122,7 +122,9 @@ export async function getGlobalSettings(): Promise<{
         subheading: 'Premium forged wheels engineered to fit every ride. Same precision as factory, endless possibilities in color and design. Make your vehicle uniquely yours.',
         primaryCta: { label: 'Explore Collection', href: '/wheels' },
         secondaryCta: { label: 'View Gallery', href: '/gallery' },
-        image: { src: '/hero-placeholder.jpg', alt: 'AVORA Forged Wheel', width: 2560, height: 1440 },
+        images: [{ src: '/hero-placeholder.jpg', alt: 'AVORA Forged Wheel', width: 2560, height: 1440 }],
+        backgroundImage: undefined,
+        height: undefined,
       },
       brandStatement: {
         quote: '"We believe a wheel is not a component. It is a declaration."',
@@ -137,6 +139,7 @@ export async function getGlobalSettings(): Promise<{
       },
       finalCta: {
         heading: 'Ready to Elevate Your Vehicle Build?',
+        description: undefined,
         ctas: [
           { label: 'Explore All Wheels', description: 'Browse our full forged wheel catalog.', href: '/wheels', variant: 'primary' },
           { label: 'Request a Quote', description: 'Get a custom quote for your specifications.', href: '/contact', variant: 'secondary' },
@@ -184,7 +187,6 @@ export async function getGlobalSettings(): Promise<{
       image: data.aboutSection.image
         ? convertStrapiImage(data.aboutSection.image)
         : { src: 'https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?w=1400', alt: 'AVORA About', width: 1400, height: 900 },
-      video: data.aboutSection.video ? { src: `${process.env.NEXT_PUBLIC_MEDIA_URL}${data.aboutSection.video.url}` } : undefined,
     } : null,
     whyAvora: {
       heading: 'Why AVORA',
@@ -201,7 +203,7 @@ export async function getGlobalSettings(): Promise<{
     },
     finalCta: {
       heading: data.finalCtas?.heading || 'Ready to Elevate Your Vehicle Build?',
-      description: data.finalCtas?.description || undefined,
+      description: (data.finalCtas as any)?.description || undefined,
       ctas: (data.finalCtas?.ctas || []).map((cta) => ({
         label: cta.label,
         description: cta.description,
