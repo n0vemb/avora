@@ -16,6 +16,7 @@ const FALLBACK_DATA = {
     secondaryCta: { label: 'View Gallery', href: '/gallery' },
     images: [{ src: 'https://images.unsplash.com/photo-1517524206127-48bbd363f3d7?w=1200', alt: 'AVORA Forged Wheel', width: 1200, height: 1200 }],
     backgroundImage: undefined as { src: string; alt: string; width: number; height: number } | undefined,
+    height: undefined as number | undefined,
   },
   features: [],
   collections: {
@@ -73,6 +74,7 @@ const FALLBACK_DATA = {
   },
   finalCta: {
     heading: 'Ready To Make It Yours?',
+    description: undefined as string | undefined,
     ctas: [
       { label: 'Start Your Project', description: 'Factory-perfect fit with unlimited color and design options.', href: '/contact', variant: 'primary' as const },
       { label: 'Contact Us', description: 'Get personalized styling recommendations.', href: '/contact', variant: 'secondary' as const },
