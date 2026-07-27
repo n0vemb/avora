@@ -1,8 +1,7 @@
 const STRAPI_API_URL = process.env.STRAPI_API_URL || 'http://localhost:1337'
 const STRAPI_API_TOKEN = process.env.STRAPI_API_TOKEN || ''
 
-const TIMEOUT = 10000
-const MAX_RETRIES = 3
+const TIMEOUT = 5000
 
 interface StrapiClientOptions {
   headers?: Record<string, string>
@@ -26,41 +25,30 @@ export async function strapiFetch<T>(
 
   const headers = { ...defaultHeaders, ...options.headers }
 
-  let retryCount = 0
-  let lastError: Error | null = null
+  try {
+    const abortController = new AbortController()
+    const timeoutId = setTimeout(() => abortController.abort(), TIMEOUT)
 
-  while (retryCount < MAX_RETRIES) {
-    try {
-      const abortController = new AbortController()
-      const timeoutId = setTimeout(() => abortController.abort(), TIMEOUT)
+    const response = await fetch(url, {
+      method: 'GET',
+      headers,
+      cache: options.cache || 'no-cache',
+      next: options.next,
+      signal: abortController.signal,
+    })
 
-      const response = await fetch(url, {
-        method: 'GET',
-        headers,
-        cache: options.cache || 'no-cache',
-        next: options.next,
-        signal: abortController.signal,
-      })
+    clearTimeout(timeoutId)
 
-      clearTimeout(timeoutId)
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`Strapi API error: ${response.status} ${response.statusText} - ${errorText}`)
-      }
-
-      return response.json() as T
-    } catch (error) {
-      lastError = error instanceof Error ? error : new Error(String(error))
-      retryCount++
-
-      if (retryCount < MAX_RETRIES) {
-        await new Promise((resolve) => setTimeout(resolve, 1000 * Math.pow(2, retryCount)))
-      }
+    if (!response.ok) {
+      console.warn(`Strapi API error: ${response.status} ${response.statusText}`)
+      return { data: [] } as unknown as T
     }
-  }
 
-  throw lastError || new Error('Strapi API request failed after retries')
+    return response.json() as T
+  } catch (error) {
+    console.warn(`Strapi API request failed: ${error instanceof Error ? error.message : String(error)}`)
+    return { data: [] } as unknown as T
+  }
 }
 
 export function buildStrapiUrl(

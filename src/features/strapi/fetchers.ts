@@ -271,7 +271,7 @@ export async function getCollections(): Promise<CollectionsSectionProps> {
     meta: {}
   }>('/collections?populate=coverImage&sort=sortOrder:asc')
 
-  const collections: CollectionCardData[] = response.data.map((item) => ({
+  const collections: CollectionCardData[] = (response.data || []).map((item) => ({
     slug: item.slug,
     name: item.name,
     tagline: item.tagline,
@@ -305,7 +305,7 @@ export async function getNavCollections(): Promise<{
     meta: {}
   }>('/collections?sort=sortOrder:asc')
 
-  return response.data.map((item) => ({
+  return (response.data || []).map((item) => ({
     slug: item.slug,
     name: item.name,
     tagline: item.tagline,
@@ -328,7 +328,7 @@ export async function getFeaturedProducts(): Promise<FeaturedProductsSectionProp
     meta: {}
   }>('/products?filters[featured][$eq]=true&populate=collection,gallery&sort=createdAt:desc')
 
-  const products: ProductCardData[] = response.data.map((item) => {
+  const products: ProductCardData[] = (response.data || []).map((item) => {
     const diameterSpec = (item.specifications || []).find(
       (spec) => spec.label.toLowerCase() === 'diameter'
     )
@@ -372,7 +372,7 @@ export async function getGalleryItems(limit = 8): Promise<GallerySectionProps> {
     meta: {}
   }>(`/gallery-items?pagination[limit]=${limit}&populate=vehicle,wheelModel,images&sort=createdAt:desc`)
 
-  const items: GalleryCardData[] = response.data.map((item) => {
+  const items: GalleryCardData[] = (response.data || []).map((item) => {
     const image = item.images?.[0]
     const vehicleAttrs = item.vehicle?.data
     const wheelAttrs = item.wheelModel?.data
@@ -987,22 +987,7 @@ export async function getSupportPage(): Promise<SupportPageData> {
 
   const data = response.data
   if (!data) {
-    return {
-      faqHeading: 'Frequently Asked Questions',
-      faqSubheading: 'Everything you need to know about AVORA forged wheels.',
-      faqItems: [
-        { question: 'How long does production take?', answer: 'Production typically takes 15-20 business days from order confirmation. Custom finishes may add 3-5 days.' },
-        { question: 'What material are AVORA wheels made from?', answer: 'All AVORA wheels are forged from 6061-T6 aerospace-grade aluminum alloy for optimal strength-to-weight ratio.' },
-        { question: 'Can I customize the finish?', answer: 'Yes. Beyond our standard finishes, we offer 200+ finish options including custom RAL color matching.' },
-        { question: 'What is the warranty?', answer: 'All AVORA forged wheels carry a lifetime structural warranty and a 2-year finish warranty against manufacturing defects.' },
-        { question: 'Do you ship internationally?', answer: 'Yes. We ship to 30+ countries worldwide with full tracking from factory to doorstep.' },
-        { question: 'Can I order a single wheel?', answer: 'Yes. We produce single wheels for spare or replacement purposes, as well as full sets and staggered configurations.' },
-      ],
-      shippingHeading: 'Shipping Information',
-      shippingContent: 'Every AVORA wheel is secured in a custom wood crate with full tracking from factory to doorstep.\n\nDomestic shipping (United States): 5-10 business days.\nInternational shipping: 20-40 business days depending on destination.\n\nAll shipments are fully insured. You will receive a tracking number once your order ships.',
-      warrantyHeading: 'Warranty',
-      warrantyContent: 'All AVORA forged wheels carry a lifetime structural warranty and a 2-year finish warranty against manufacturing defects.\n\nStructural Warranty: Covers any structural failure or defect in materials and workmanship for the lifetime of the wheel.\n\nFinish Warranty: Covers peeling, fading, or discoloration of the finish for 2 years from the date of purchase.\n\nTo file a warranty claim, please contact our support team with your order number and photos of the issue.',
-    }
+    return getSupportPageFallback()
   }
 
   return {
@@ -1015,5 +1000,24 @@ export async function getSupportPage(): Promise<SupportPageData> {
     shippingContent: data.shippingContent || '',
     warrantyHeading: data.warrantyHeading || 'Warranty',
     warrantyContent: data.warrantyContent || '',
+  }
+}
+
+function getSupportPageFallback(): SupportPageData {
+  return {
+    faqHeading: 'Frequently Asked Questions',
+    faqSubheading: 'Everything you need to know about AVORA forged wheels.',
+    faqItems: [
+      { question: 'How long does production take?', answer: 'Production typically takes 15-20 business days from order confirmation. Custom finishes may add 3-5 days.' },
+      { question: 'What material are AVORA wheels made from?', answer: 'All AVORA wheels are forged from 6061-T6 aerospace-grade aluminum alloy for optimal strength-to-weight ratio.' },
+      { question: 'Can I customize the finish?', answer: 'Yes. Beyond our standard finishes, we offer 200+ finish options including custom RAL color matching.' },
+      { question: 'What is the warranty?', answer: 'All AVORA forged wheels carry a lifetime structural warranty and a 2-year finish warranty against manufacturing defects.' },
+      { question: 'Do you ship internationally?', answer: 'Yes. We ship to 30+ countries worldwide with full tracking from factory to doorstep.' },
+      { question: 'Can I order a single wheel?', answer: 'Yes. We produce single wheels for spare or replacement purposes, as well as full sets and staggered configurations.' },
+    ],
+    shippingHeading: 'Shipping Information',
+    shippingContent: 'Every AVORA wheel is secured in a custom wood crate with full tracking from factory to doorstep.\n\nDomestic shipping (United States): 5-10 business days.\nInternational shipping: 20-40 business days depending on destination.\n\nAll shipments are fully insured. You will receive a tracking number once your order ships.',
+    warrantyHeading: 'Warranty',
+    warrantyContent: 'All AVORA forged wheels carry a lifetime structural warranty and a 2-year finish warranty against manufacturing defects.\n\nStructural Warranty: Covers any structural failure or defect in materials and workmanship for the lifetime of the wheel.\n\nFinish Warranty: Covers peeling, fading, or discoloration of the finish for 2 years from the date of purchase.\n\nTo file a warranty claim, please contact our support team with your order number and photos of the issue.',
   }
 }
